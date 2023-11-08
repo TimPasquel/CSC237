@@ -1,0 +1,319 @@
+/*******************************************************************/
+/*    Author:        Tim Pasquel                                   */
+/*    Course:        CSC237                                        */
+/*    Filename:      main.cpp                                      */
+/*    Purpose:       Counts the number of unique words using       */
+/*    		     1 of 8 methods specified by the user.         */
+/*******************************************************************/
+
+#include <array>
+#include <iostream>
+#include <fstream>
+#include <iomanip>
+#include <sstream>
+#include <string>
+#include "WordData.h"
+#include <vector> 
+
+using namespace std;
+
+void getFilename(string& filename) {
+	cout << "Please enter in a filename." <<endl;
+	cin >> filename;	
+}
+
+void printMenu() {
+	cout << "Enter a number, 1-8, to choose from the menu below:" << endl;
+	cout << "1. Parallel Iterative" << endl;
+	cout << "2. Parallel Recursive" << endl;
+	cout << "3. Object Array Iterative" << endl;
+	cout << "4. Obejct Array Recursive" << endl;
+	cout << "5. Object Array Pointer Recursive" << endl;
+	cout << "6. STL Vector For Loop" << endl;
+	cout << "7. STL Vector Iterator" << endl;
+	cout << "8. Exit" << endl;
+}
+
+void readSeqContainer(fstream& file, vector<WordData> vect, int&count) {
+	string current_word;
+
+        // https://stackoverflow.com/questions/20372661/read-word-by-word-from-file-in-c
+        // https://www.tutorialspoint.com/cplusplus-program-to-read-file-word-by-word
+        while(file >> current_word) {
+
+		WordData current_element;
+
+		if(count == 0) {
+			current_element.setWord(current_word);
+			vect.push_back(current_element);
+			vect[0].operator++();
+		}	
+		else {
+                        bool found = false;
+                        for(int index = 0; index < vect.capacity(); index++) {
+                                if(!current_word.compare(vect[index].getWord())) {               //checks to see if current word is in array
+                                        found = true;
+                                        vect[index].operator++();
+                                        break;                                          //then adds 1
+                                }
+                        }
+                        if(!found) {
+                                count += 1;
+				current_element.setWord(current_word);
+                                vect.push_back(current_element);       //if not add it
+                                vect[count].setCount(1);
+                        }
+
+                }
+                current_word.clear();
+	}	                                                                                                	
+}
+
+void printSeqContainer(fstream& file) {
+	vector<WordData> vect;
+
+	int count = 0;
+
+	readSeqContainer(file, vect, count);
+
+	cout << "Seq Container Iterative" << endl;
+        cout << "------------------------------" << endl;
+        cout << "Word           Occurrences" << endl;
+        cout << "------------------------------" << endl;
+
+	for(int index = 0; index < count; index++) {
+		cout << setw(20) << left << vect[index].getWord() << setw(10) << vect[index].getCount() << endl;
+	}
+		
+}
+
+void readObjectArray(fstream& file, WordData Data[], int size, int&count) {
+	string current_word;
+
+	while(file >> current_word) {
+		if(Data[0].getWord() == "") {				//fills in the first index
+			Data[0].setWord(current_word);
+			Data[0].setCount(1);
+		}
+		else {
+			bool found = false;
+			for(int index = 0; index < size; index++) {
+				if(!current_word.compare(Data[index].getWord())) {	//checks to see if current word is in array
+					found = true;
+					Data[index].operator++();
+					break;
+				}
+			}					
+			if(!found && (count < size)) {
+                                count += 1;
+                                Data[count].setWord(current_word);       //if not add it
+                                Data[count].setCount(1);
+                        }
+		}
+		current_word.clear();	
+	}
+} 
+
+void printObjectArrayIterative(fstream& file) {
+	const int uniqueWordsTotal = 10;
+
+	WordData data[uniqueWordsTotal];
+	
+        int count = 0;
+
+	readObjectArray(file, data, uniqueWordsTotal, count);	
+
+	cout << "Object Array Iterative" << endl;
+        cout << "------------------------------" << endl;
+        cout << "Word           Occurrences" << endl;
+        cout << "------------------------------" << endl;
+
+        for(int index = 0; index < count; index++) {
+        	cout << setw(20) << left << data[index].getWord() << setw(10) << data[index].getCount() << endl;
+        }
+}
+
+void printObjectArrayTable(WordData* data, int count) {
+	static int flag = 0;
+
+        if(flag == 0) {
+                cout << "Object Array Recursive" << endl;
+                cout << "------------------------------" << endl;
+                cout << "Word           Occurrences" << endl;
+                cout << "------------------------------" << endl;
+        }
+        if(flag == count) {
+                flag = 0;
+                return;
+        }
+
+        cout << setw(20) << left << data[flag].getWord() << setw(10) << data[flag].getCount() << endl;
+        flag += 1;
+
+        printObjectArrayTable(data, count);	
+}
+
+void printObjectArrayRecursive(fstream& file) {
+	const int uniqueWordsTotal = 10;
+
+        WordData data[uniqueWordsTotal];
+
+        int count = 0;
+
+        readObjectArray(file, data, uniqueWordsTotal, count);
+
+	printObjectArrayTable(data, count);
+}
+
+void readParallelArrays(fstream& file, string words[], int wordsCount[], int size, int& count) {
+	string current_word;
+
+	// https://stackoverflow.com/questions/20372661/read-word-by-word-from-file-in-c
+	// https://www.tutorialspoint.com/cplusplus-program-to-read-file-word-by-word
+	while(file >> current_word) {
+		if (words[0] == "") {		//fill in first index
+			words[0] = current_word;
+			wordsCount[0] = 1;
+		}
+		else {
+			bool found = false;
+			for(int index = 0; index < size; index++) {
+				if(!current_word.compare(words[index])) {		//checks to see if current word is in array
+					found = true;
+					wordsCount[index] += 1;
+					break;						//then adds 1
+				}
+			}
+			if(!found && (count < size)) {
+				count += 1;
+				words[count] = current_word;       //if not add it
+				wordsCount[count] = 1;
+			}
+
+		}	
+		current_word.clear();
+	}
+}
+
+void printParallelRecursiveTable(string words[], int wordsCount[], int count) {
+	
+      // https://www.geeksforgeeks.org/c-program-to-print-an-array-using-recursion/
+      
+            static int flag = 0;
+      
+            if(flag == 0) {
+                    cout << "Parallel Recursive" << endl;
+                    cout << "------------------------------" << endl;
+                    cout << "Word           Occurrences" << endl;
+                    cout << "------------------------------" << endl;
+            }
+            if(flag == count) {
+                    flag = 0;
+                    return;
+            }
+      
+            cout << setw(20) << left << words[flag] << setw(10) << wordsCount[flag] << endl;
+            flag += 1;
+
+            printParallelRecursiveTable(words, wordsCount, count);	
+}
+
+void printParallelRecursive(fstream& file) {
+	const int uniqueWordsTotal = 10;
+
+        string uniqueWords[uniqueWordsTotal]; 			// array<string, uniqueWordsTotal> uniqueWords;
+        int uniqueWordsCount[uniqueWordsTotal]; 		//array<int, uniqueWordsTotal> uniqueWordsCount;
+
+        int count = 0; 						//how many unique words are actually in the lists
+
+	readParallelArrays(file, uniqueWords, uniqueWordsCount, uniqueWordsTotal, count);
+
+	printParallelRecursiveTable(uniqueWords, uniqueWordsCount, count);
+}
+
+void printParallelIterative(fstream& file) { 			//working on
+	const int uniqueWordsTotal = 10;
+
+        string uniqueWords[uniqueWordsTotal]; 			// array<string, uniqueWordsTotal> uniqueWords;
+        int uniqueWordsCount[uniqueWordsTotal]; 		//array<int, uniqueWordsTotal> uniqueWordsCount;
+
+        int count = 0; 						//how many unique words are actually in the lists
+
+	readParallelArrays(file, uniqueWords, uniqueWordsCount, uniqueWordsTotal, count);
+
+	cout << "Parallel Iterative" << endl;
+        cout << "------------------------------" << endl;
+        cout << "Word           Occurrences" << endl;
+        cout << "------------------------------" << endl;
+
+        for(int index = 0; index < count; index++) {
+                cout << setw(20) << left << uniqueWords[index] << setw(10) << uniqueWordsCount[index] << endl;
+        }
+}
+
+int main(int argc, char **argv) {
+	
+	if(argc == 2) {				//Batch Mode
+		string filename = argv[1];
+		
+		fstream file;
+		file.open(filename.c_str());
+
+		printParallelIterative(file);
+		
+		//https://stackoverflow.com/questions/28331017/rewind-an-ifstream-object-after-hitting-the-end-of-file
+		file.clear();
+		file.seekg(0);
+
+		printParallelRecursive(file);
+
+		file.clear();
+		file.seekg(0);
+
+		printObjectArrayIterative(file);
+	
+		file.clear();
+		file.seekg(0);
+
+	        printObjectArrayRecursive(file);
+
+	        file.close();
+	}
+	else {
+
+	string filename;
+
+	getFilename(filename);
+	
+	fstream file;
+        file.open(filename.c_str());
+
+	//PARALLEL ARRAYS
+	printParallelIterative(file);
+	file.clear();
+	file.seekg(0);
+
+	printParallelRecursive(file);
+	file.clear();
+	file.seekg(0);
+
+	//OBJECT ARRAYS
+	printObjectArrayIterative(file);
+	file.clear();
+	file.seekg(0);
+
+	printObjectArrayRecursive(file);
+	file.clear();
+	file.seekg(0);
+
+	//SEQUENTIAL CONTAINER
+	printSeqContainer(file);
+	file.clear();
+	file.seekg(0);
+	
+	//UNLIMITED LENGTH!!!!!!!
+	file.close();
+	}
+
+	return 0;
+}

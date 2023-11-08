@@ -1,0 +1,9 @@
+alpha
+alpha
+beta !beta alpha
+\a charlie !charlie charlie
+delta echo echo echo
+foxtrot foxtrot () ..
+12 :q end
+alpha
+

@@ -1,0 +1,236 @@
+//
+//Author: Tim Pasquel
+//Course: CSC237
+//Filename: testLL.cpp
+//Purpose: To create a circular linked list and the proper
+//         Operations to go along with it. Gives the user
+//    	   The abilty to insert a number, remove a specific
+//         number, print forwards, print backwards, and
+//         exit
+//
+//
+
+#include <cstring>
+#include <iostream>
+#include <fstream>
+#include <iomanip>
+#include <sstream>
+#include <string>
+#include "CLinkedList.h"
+
+using namespace std;
+
+///
+///    Function name:   printMenu
+///
+///    Description:     Will display all 5 options for the user
+///
+///    Parameters:      none
+///
+///    Member Type:     NA
+///
+///    Return Value:    none
+///
+void printMenu();
+
+
+///
+///    Function name:   insertNumber
+///
+///    Description:     Will insert the user's number into
+///    		       the CLinkedList appropriately 
+///
+///    Parameters:      ClinkedList<int> &clist 
+///    		       -The CLinkedList to be inserted into
+///
+///    Member Type:     NA
+///
+///    Return Value:    none
+///
+void insertNumber(CLinkedList<int> &clist);
+
+
+///
+///    Function name:   removeNumber
+///
+///    Description:     Will remove the user's number from
+///    		       the CLinkedList appropriately
+///
+///    Parameters:      ClinkedList<int> &clist 
+///    		       -The CLinkedList to be printed out
+///    		       Import/Export
+///
+///    Member Type:     NA
+///
+///    Return Value:    none
+///
+void removeNumber(CLinkedList<int> &list);
+
+///
+///    Function name:   fowardPrint
+///
+///    Description:     Prints the list in order from least
+///    		       to greatest
+///
+///    Parameters:      ClinkedList<int> &clist 
+///    		       -The CLinkedList to be printed out
+///		       Import/Export
+///
+///    Member Type:     NA
+///
+///    Return Value:    none
+///
+void fowardPrint(CLinkedList<int> &clist);
+
+///
+///    Function name:   main
+///
+///    Description:     Main functions that drives the application
+///
+///    Parameters:      none
+///
+///    Member Type:     NA
+///
+///    Return Value:    none
+///
+int main() {
+	char choice_selection;
+	int remove_number;
+ 	bool exit_flag = true;
+	CLinkedList<int> clist;
+
+	//Test Values
+	CLinkedList<int> clist1;
+	clist1.insert(5);
+	clist1.insert(10);
+	clist1.insert(15);
+	clist1.insert(20);
+	clist1.insert(25);
+
+	clist1.insert(12);
+	clist1.insert(21);
+	clist1.insert(18);
+	clist1.insert(107);
+	cout << clist1 << endl;
+
+	clist1.remove(107);
+	clist1.remove(18);
+	cout << clist1 << endl;
+
+	cout << "Copy examples" <<endl;
+	CLinkedList<int> clistA;
+	clistA.insert(1);
+	clistA.insert(2);
+	clistA.insert(3);
+	cout << clistA << endl;
+
+	CLinkedList<int> clistB;
+	CLinkedList<int> clistC(clistA);
+
+	clistB = clistA;
+
+	cout << clistB << endl;
+	cout << clistC << endl;
+	//Test Values 
+	
+	do {
+		printMenu();
+		cin >> choice_selection;
+		
+		switch(choice_selection){
+			case 'i':
+			case 'I':
+			{
+				insertNumber(clist);
+				break;
+			}
+			case 'r':
+			case 'R':
+			{
+				removeNumber(clist);
+				break;
+			}
+			case 'f':
+			case 'F':
+			{
+				fowardPrint(clist);
+				break;
+			}
+			case 'b':
+			case 'B':
+			{
+				clist.outputReverse();
+				break;
+			}
+			case 'e':
+			case 'E':
+			{
+				exit_flag = false;
+				break;
+			}
+			default:
+			{
+				cout << "Invalid menu choice!!" << endl;
+				break;
+			}			
+		}	
+	}
+	while(exit_flag);
+	
+	return 0;
+}
+
+void printMenu() {
+	cout << endl;
+	cout << "Choose from the following:" <<endl;
+	cout << endl;
+	cout << "I - Insert Integer" <<endl;
+	cout << "R - Remove Integer" <<endl;
+	cout << "F - Forward Print" <<endl;
+	cout << "B - Backward Print" <<endl;
+	cout << "E - Exit" <<endl;
+	cout << "*********************************" <<endl;
+}
+
+void insertNumber(CLinkedList<int> &clist) {
+	int insert_number;
+
+	cout << "What number would you like to insert?: ";
+	cin >>	insert_number;
+	if(clist.empty())
+		cout << "into empty: " << insert_number << endl;
+	else
+		cout << "inserted: " << insert_number << endl;	
+	clist.insert(insert_number);	
+}
+
+void removeNumber(CLinkedList<int> &clist) {
+	int remove_number;
+
+	cout << "What number would you like to remove?: ";
+	cin >>	remove_number;
+
+	if(clist.empty()){
+		cout << "the list is empty, nothing to remove" << endl;
+		return;
+	}
+
+	if(clist.find(remove_number)) {
+
+		if(clist.empty())
+			cout << "removed only node in list: " << remove_number << endl;
+		else
+			cout << "removed: " << remove_number << endl;
+		clist.remove(remove_number);
+	}
+	else {
+		cout << remove_number << " is not in the list" << endl;
+	}
+}
+
+void fowardPrint(CLinkedList<int> &clist) {
+	if(clist.empty())
+		cout << "The list is empty, nothing to print." << endl;
+	else
+		cout << clist << endl;
+}

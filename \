@@ -1,0 +1,220 @@
+// File: Node.h
+// Singly-linked list Node definition/implementation (also good for circular)
+
+#ifndef NODE_H
+#define NODE_H
+#include <cassert> 
+#include <assert.h>
+#include <iostream>
+
+using namespace std;
+
+// Need to prototype template classes if they are to be friends
+template <typename eltType> class CLinkedList;
+template <typename eltType> class CListItr;
+//template <typename eltType>
+//	ostream& operator<<(ostream& os,CLinkedList<eltType>& l);
+
+template <typename eltType> class Node
+{       private:
+		Node(eltType info, Node* link = NULL ) :
+					       data(info), next(link) 
+		{};
+		eltType data;
+		Node *next;
+        friend class CLinkedList<eltType>;
+        friend class CListItr<eltType>;
+};
+
+//Set up the CLinkedList class
+template <typename eltType> class CLinkedList {
+	public:
+	//Construct an empty CLinkedList
+	CLinkedList();
+	//Construct deep copy of another CLinkedList
+	CLinkedList(CLinkedList&);
+	//Destroy CLinkedList
+	//~CLinkedList(); !!!!!!!!!!!!!!!!!!
+	//Is the CLinkedList empty?
+	bool empty();
+	//Find a specific element
+	bool find(eltType);
+	//insert element in an ordered manner
+	void insert(eltType);
+	//remove element from list
+	void remove(eltType);
+
+	private:
+	//CLinkedList pointer
+	Node<eltType>* last;
+
+	//Get a copy of a (deep) Node
+	Node<eltType>* copy(Node<eltType> *);
+
+	//Free Nodes of CLinkedList
+	void destroy(Node<eltType> *);
+
+	//Needed to use a list iterator
+	friend class CListItr<eltType>;
+};
+
+//template for output for CLinkedList
+//template <typename eltType>
+//	ostream& operator<<(ostream &os, const CLinkedList<eltType> &l);
+
+//Set up the iterator for CLinkedClass
+//Object that provides a pointer to a CLinkedList
+template <typename eltType> class CListItr {
+	public:
+	//Construct CList Iterator
+	CListItr(const CLinkedList<eltType> &l);
+	
+	//sets the iterator to the first Node of the
+	//linked list (or NULL if empty)
+	void begin();
+	
+	//returns whether the list is empty
+	bool isEmpty();
+
+	//returns whether the present Node is the first Node
+	bool isFirstNode();
+
+	//returns whether the present Node is the last Node
+	bool isLastNode();
+
+	//returns the data of the Node currently pointed at
+	eltType operator*();
+
+	//pre increment operator advances the pointer to the
+	//next Node in the list, if there is one 
+	void operator++();
+
+	//post increment operator advances the pointer to the
+	//next Node in the list, if there is one
+	void operator++(int);	
+
+	private:
+	const CLinkedList<eltType> &itr;
+	Node<eltType> *curr;
+};
+
+/////////////////////////////////////////////////////////////
+//CLinked List Functions
+/////////////////////////////////////////////////////////////
+
+//Construct an empty CLinkedList
+template <typename eltType> CLinkedList<eltType>::
+	CLinkedList():last(NULL) 
+{}
+
+//Check to see if CLinked List is empty
+template <typename eltType> bool CLinkedList<eltType>::empty()
+{return (last == NULL);}
+
+template <typename eltType>
+	void CLinkedList<eltType>::insert(eltType x) {
+ 	
+	//Node<eltType> *curr = *last;
+	
+	//CLinkedList is Empty
+	if(empty()) {
+		last = new Node<eltType>(x, last);
+		last->next = last;
+		//last->next = new Node<eltType>(x, last = NULL);
+		//last->next = last;
+		//Node<eltType> *temp;
+		//temp->data = x;
+		//last = temp;
+		//last->next = last;
+		return;
+	} 
+	
+	//Inserting at the end of the list	
+	else if(x > last->data){
+		//last = new Node<eltType>(x, last->next);
+		//last->next = last;
+		Node<eltType> *temp1 = new Node<eltType>(x, last->next);
+		last->next = temp1;
+		last = temp1;
+	 	return;
+	}
+	
+	//Inserting between nodes
+	else {
+		Node<eltType> *trailp = last->next;
+		Node<eltType> *p = last->next->next;
+
+		while(x < p->data) {
+			//if(x < p->data && x > trailp->data)
+			//	trailp->next = new Node<eltType>(x, p);
+			trailp->next = p;
+			p = p->next;
+		}
+		trailp->next = new Node<eltType>(x, p);
+		return;
+	}	
+}
+
+//Output a CLinkedList, using a CLinkedList iterator
+template <typename eltType>
+	ostream& operator<<(ostream& os, const CLinkedList<eltType>& l)
+{	CListItr<eltType> itr(l);
+	itr.begin(); 
+	do {
+		os << itr.operator*() << " ";
+	 	itr.operator++();
+	}
+	while(!itr.isLastNode()); 
+	//if(itr.isLastNode())
+	os << itr.operator*() << " ";
+	//for(itr.begin(); itr.isLastNode(); itr.operator++())
+	//	os << itr.operator*() << " ";
+	return os;
+
+}
+
+/////////////////////////////////////////////////////////////
+//Iterator Functions
+/////////////////////////////////////////////////////////////
+
+// Construct a CLinkedList Iterator. Consists of:
+// A reference to a CLinkedList object
+// A pointer to the actual list, initially pointing to last
+template <typename eltType>
+CListItr<eltType>::CListItr(const CLinkedList<eltType> &l): itr(l),curr(l.last)
+{}
+
+//Set curr to point at itr's last
+template <typename eltType> void CListItr<eltType>::begin(void)
+{curr = itr.last->next;}
+
+//Checks to see if the CLinkedList is empty
+template <typename eltType> bool CListItr<eltType>::isEmpty(void)
+{return curr == NULL;}
+
+//Checks to see if the current node is the first node
+template <typename eltType> bool CListItr<eltType>::isFirstNode(void)
+{return curr == itr.last->next;}
+
+//Checks to see if the current node is the last node
+template <typename eltType> bool CListItr<eltType>::isLastNode(void)
+{return curr == itr.last;}
+
+//Return the data in curr's node
+template <typename eltType> eltType CListItr<eltType>::operator*(void)
+{//assert(curr != itr.last);
+	return curr->data;
+}
+
+//Pre-increment operator advances the pointer to the next node, if one
+template <typename eltType> void CListItr<eltType>::operator++(void)
+{//assert(curr != itr.last);
+	curr = curr->next;
+}
+
+//Post-increment operator advances the pointer to the next node, if one
+template <typename eltType> void CListItr<eltType>::operator++(int)
+{
+	curr = curr->next;
+}
+#endif

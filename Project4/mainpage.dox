@@ -1,0 +1,13 @@
+
+/**
+\mainpage Binary Search Tree | Project 4 | Course: CSC237 | Author: Tim Pasquel | Instructor: Dr.Spiegel 
+\n
+The following documentation describes the workings of a Binary Search Tree (BinarySearchTree.cpp BinarySearchTree.h). The user will be able to add and remove values to the Binary Search Tree within the application (Treetest.cpp). When adding values, if the value is already in the tree a copy will be stored in a counter for that node. For removing, if there are multiple copies for a value, the user will be able to remove either all copies of that value or one of the copies of it. Furthermore, within the application, the user can print the data in order of value as well as print the data as it would look like if it was a drawing of a Binary Search Tree. 
+\n
+\n
+This took a long time to figure out so I hope you laughed :)
+\n
+\image html Dr.Spiegel.png
+\image latex Dr.Spiegel.png 
+---
+*/

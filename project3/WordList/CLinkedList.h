@@ -1,0 +1,667 @@
+///File: CLinkedList.h               			
+///Prepared by: Dr. Spiegel         			
+///Description: A file that is composed of 3 objects. First,
+///             there is the Node object which constists of
+///             data housed within the node and a link to 
+///             the next node in the list. Next, a CLinkedList
+///             object that connects all of the individual nodes
+///             together in an ordered and circular manner. Lastly,
+///             there is CListItr which is an iterator that refers
+///             to the CLinkedList object to be created so that 
+///             it can iterate throughout the entire list object
+///
+
+/*!	\file CLinkedList.h 
+ * *	\brief A custom data structure that uses a circular linked
+ * *    list 
+ * *	\class CLinkedList 
+ * *	\brief A class that utilizes a circular linked list
+ * *    \class CListItr
+ * *    \brief A custom iterator for CLinkedList
+ * *    \class Node
+ * *    \brief An individual node on the CLinkedList, holds info and a pointer to the next node
+ * */
+
+#ifndef CLINKEDLIST_H
+#define CLINKEDLIST_H
+#include <cassert> 
+#include <assert.h>
+#include <iostream>
+
+using namespace std;
+
+// Need to prototype template classes if they are to be friends
+template <typename eltType> class CLinkedList;
+template <typename eltType> class CListItr;
+
+template <typename eltType> class Node
+{       private:
+///
+///Function Name: Constructor
+///
+///Description: Constructs an object Node
+///
+///Paramaters: eltType info - information for the
+///	       data section of the Node
+///	       Import
+///
+///	       Node* link - the link to the next Node,
+///	       if one
+///	       Import
+///
+///Member Type: Mutator
+///
+///Return Value: None
+///
+		Node(eltType info, Node* link = NULL ) :
+					       data(info), next(link) 
+		{};
+		eltType data;
+		Node *next;
+        friend class CLinkedList<eltType>;
+        friend class CListItr<eltType>;
+};
+
+//Set up the CLinkedList class
+template <typename eltType> class CLinkedList {
+	public:
+	//Construct an empty CLinkedList
+	CLinkedList();
+	//Construct deep copy of another CLinkedList[copy constructor]
+	CLinkedList(CLinkedList&);
+	//Destructor of CLinkedList
+	~CLinkedList(); 
+	//Assign another CLinkedList to this Linked List
+	CLinkedList& operator=(const CLinkedList&);
+	//Is the CLinkedList empty?
+	bool empty();
+	//insert element in an ordered manner
+	void insert(eltType);
+	//remove element from list
+	void remove(eltType);
+	//Is the element in the list
+	bool find(eltType);	
+	//prints each node in reverse
+	void printReverse(Node<eltType> *node);
+
+	//The helperfunction that houses printReverse for recursion
+	void outputReverse();
+
+	private:
+	//CLinkedList pointer
+	Node<eltType>* last;
+
+	//Get a copy of a (deep) Node
+	Node<eltType>* copy(Node<eltType> *);             //Node<eltType>* instead of void
+
+	//Free Nodes of CLinkedList
+	void destroy(Node<eltType> *);
+
+	//Needed to use a list iterator
+	friend class CListItr<eltType>;
+};
+
+template <typename eltType> class CListItr {
+	public:
+	//Construct CList Iterator
+	CListItr(const CLinkedList<eltType> &l);
+	
+	//sets the iterator to the first Node of the
+	//linked list (or NULL if empty)
+	void begin();
+	
+	//returns whether the list is empty
+	bool isEmpty();
+
+	//returns whether the present Node is the first Node
+	bool isFirstNode();
+
+	//returns whether the present Node is the last Node
+	bool isLastNode();
+
+	//returns the data of the Node currently pointed at
+	eltType operator*();
+
+	//returns the data of the Node currently pointed at
+        const eltType operator*() const;
+
+	//pre increment operator advances the pointer to the
+	//next Node in the list, if there is one 
+	CListItr<eltType> &operator++();
+
+	//post increment operator advances the pointer to the
+	//next Node in the list, if there is one
+	CListItr<eltType> &operator++(int);	
+
+	private:
+	const CLinkedList<eltType> &itr;
+	Node<eltType> *curr;
+};
+
+/////////////////////////////////////////////////////////////
+//CLinked List Functions
+/////////////////////////////////////////////////////////////
+
+///
+///Function Name: Constructor
+///
+///Description: Will construct an empty CLinked List Object
+///	       with last pointing to NULL
+///
+///Parameters: None
+/// 
+///Member Type: Mutator
+///
+///Return Value: None
+///
+template <typename eltType> CLinkedList<eltType>::
+	CLinkedList():last(NULL) 
+{}
+
+///
+///Function Name: Destructor
+///
+///Description: Will deconstruct a CLinked List Object
+///	       through the use of recursion
+///
+///Parameters: None
+/// 
+///Member Type: Mutator
+///
+///Return Value: None
+///
+template <typename eltType> CLinkedList<eltType>::~CLinkedList()
+{
+	if(empty())
+		return;	
+	destroy(last->next);
+	last = NULL;
+	return;
+}
+
+///
+///Function Name: destroy
+///
+///Description: Will delete a single node of a list
+///	       through the use of recursion
+///
+///Parameters: Node<eltType> *node - The current Node
+///	      of the list object
+///	      Import
+/// 
+///Member Type: Mutator
+///
+///Return Value: void
+///
+template <typename eltType> 
+	void CLinkedList<eltType>::destroy(Node<eltType> *node) {
+	if(node != last)
+		destroy(node->next);
+	delete node;
+	return;
+}
+
+///
+///Function Name: operator=
+///
+///Description: Creates a deep copy of a CLinkedList
+///
+///Parameters: const CLinkedList<eltType>& list - A const
+///	      reference to a circular linked list that
+///	      is to be copied
+///	      Import
+/// 
+///Member Type: Mutator
+///
+///Return Value: CLinkedList<eltType> - A a copy of 
+///              the original list
+///
+template <typename eltType> 
+	CLinkedList<eltType> &CLinkedList<eltType>::
+	operator=(const CLinkedList<eltType>& list) {
+	if(this != &list) {
+		destroy(last);
+		last = copy(list.last);
+	}
+	return *this;
+}
+
+///
+///Function Name: CLinkedList
+///
+///Description: A copy constructor of a CLinkedList
+///
+///Parameters: CLinkedList<eltType> &cl - A reference
+///	      to a circular linked list that is to be 
+///	      copied
+///	      Import
+/// 
+///Member Type: Mutator
+///
+///Return Value: None 
+///
+template <typename eltType> 
+	CLinkedList<eltType>::CLinkedList(CLinkedList<eltType> &cl) 
+{last = copy(cl.last);}
+
+///
+///Function Name: find
+///
+///Description: Sees if x is in the list, if in the list
+//		return true, otherwise false
+///
+///Parameters: eltType x - the variable to be found in the list
+///	       Import
+/// 
+///Member Type: Inspector
+///
+///Return Value: bool
+///
+template <typename eltType> 
+	bool CLinkedList<eltType>::find(eltType x) {
+	if(last->data == x)
+		return true;
+	Node<eltType> *temp = last->next;
+	while(temp != last && temp->data != x) {
+		temp = temp->next;
+	}
+	return (temp != last && temp->data == x);
+
+}
+
+///
+///Function Name: copy
+///
+///Description: The deep copy. Copy the source of list l, 
+///	       one node at a time
+///
+///Parameters: Node<eltType> *l - The current node that is 
+///	      to be copied
+///	      Import
+/// 
+///Member Type: Inspector
+///
+///Return Value: Node<eltType>* - A pointer to the current
+///		node that has been copied 
+///
+template <typename eltType> 
+	Node<eltType>* CLinkedList<eltType>::copy(Node<eltType> *l) {
+	
+        if(!l)
+           return NULL; 
+
+        Node<eltType>* old_list = l;
+	Node<eltType>* new_list = last = new Node<eltType>(l->data);
+
+	for(l = l->next; l != old_list; l = l->next, last = last->next) {
+	   last->next = new Node<eltType>(l->data);
+	}
+	last->next = new_list;
+	return new_list;
+}
+
+///
+///Function Name: empty
+///
+///Description: Checks to see if the list is empty
+///
+///Parameters: None
+/// 
+///Member Type: Inspector
+///
+///Return Value: bool
+///
+template <typename eltType> bool CLinkedList<eltType>::empty()
+{return (last == NULL);}
+
+///
+///Function Name: insert
+///
+///Description: Creates a new node to house the data
+///	       that is in the paramater. That node
+///	       is then put into the list
+///
+///Parameters: eltType x - The data that is to be 
+///	      inserted into the list
+///	      Import
+/// 
+///Member Type: Mutator
+///
+///Return Value: void
+///
+template <typename eltType>
+	void CLinkedList<eltType>::insert(eltType x) {
+ 	
+	//CLinkedList is Empty
+	if(empty()) {
+		last = new Node<eltType>(x, last);
+		last->next = last;
+		return;
+	} 
+	
+	//Inserting if there is just one Node
+	else if(last == last->next) {
+		Node<eltType> *temp = new Node<eltType>(x, last);
+		
+		//Larger than the current last
+		if(x > last->data) {
+			last->next = temp;
+			last = temp;	//move last
+		}
+
+		//Smaller than the current last
+		else {
+			last->next = temp;
+		}
+		return;	
+	}
+
+	//Insert before the least case [last->next]
+	else if(x < last->next->data) {
+		Node<eltType> *temp2 = new Node<eltType>(x, last->next);
+		last->next = temp2;
+		return;
+	}
+
+	//Inserting after the greatest case [last]	
+	else if(x > last->data){
+		Node<eltType> *temp1 = new Node<eltType>(x, last->next);
+		last->next = temp1;
+		last = temp1;
+	 	return;
+	}
+	
+	//Inserting between nodes
+	else {
+		Node<eltType> *trailp = last->next;
+		Node<eltType> *p = last->next->next;
+
+		while(x > p->data) {
+			trailp = p;
+			p = p->next;
+		}
+		trailp->next = new Node<eltType>(x, p);
+		return;
+	}	
+}
+
+///
+///Function Name: remove
+///
+///Description: Deletes a node that matches the data
+///	       that is in the paramater. That node
+///	       is removed from the list
+///
+///Parameters: eltType x - The data that is to be 
+///	      removed from the list
+///	      Import
+/// 
+///Member Type: Mutator
+///
+///Return Value: void
+///
+template <typename eltType>
+	void CLinkedList<eltType>::remove(eltType x) {
+	
+	//List is empty
+	if(empty())
+		return;
+
+	//If there is only one Node in the List
+	else if((last == last->next) && (last->data == x)) {
+		delete last;
+		last=NULL;
+		return;			
+	}
+	
+	//If removing the least value [last->next]
+	else if(last->next->data == x) {
+		Node<eltType> *temp = last->next->next;
+		delete last->next;
+		last->next = temp;
+		return;
+	}
+
+	//If removing the greatest value [last]
+	else if(last->data == x) {
+		Node<eltType> *temp = last->next;
+		while(temp->next != last) {
+			//temp will become one node before last
+			temp = temp->next; 
+		}
+		temp->next = last->next;
+		delete last;
+		last = temp;
+		return;
+	}
+
+
+	//If x is within the list
+	else {
+		Node<eltType> *p = last->next->next;
+		Node<eltType> *trailp = last->next;
+
+		while(p->data != x) {
+			trailp = p;
+			p = p->next;
+		}
+		trailp->next = p->next;
+		delete p;
+		return;
+	}
+}
+
+//Was told not to document this function last project
+//Output a CLinkedList, using a CLinkedList iterator
+template <typename eltType>
+	ostream& operator<<(ostream& os, const CLinkedList<eltType>& l)
+{	CListItr<eltType> itr(l);
+	itr.begin();
+	while(!itr.isLastNode())
+	{
+		os << *itr << " " << endl;
+	 	itr++;
+	}
+	os << *itr << " " << endl;
+	return os;
+
+}
+
+///
+///Function Name: printReverse
+///
+///Description: Prints each node in the list 
+///	       in reverse. Does this recursivly
+///
+///Parameters: Node<eltType> *node - The current
+///	      node in the list that needs to be
+///	      printed in reverse 
+///	      Import
+/// 
+///Member Type: Inspector
+///
+///Return Value: void
+///
+template <typename eltType>
+	void CLinkedList<eltType>::printReverse(Node<eltType> *node) {
+	if(node != last)
+		printReverse(node->next);
+	cout << node->data << " ";
+	return;
+}
+
+///
+///Function Name: outputReverse
+///
+///Description: Helper function that prints 
+///	       each node in the list 
+///	       in reverse. Does this recursivly
+///
+///Parameters: None
+/// 
+///Member Type: Inspector
+///
+///Return Value: void
+///
+template <typename eltType>
+	void CLinkedList<eltType>::outputReverse() {
+	if(empty()){
+		cout << "the list is empty, nothing to print" << endl;
+		return;
+	}
+	printReverse(last->next);
+	return;
+}
+
+/////////////////////////////////////////////////////////////
+//Iterator Functions
+/////////////////////////////////////////////////////////////
+
+///
+///Function Name: Constructor
+///
+///Description: Will construct an iterator for a CLinked
+///	       List based on the list that was passed.
+///	       Creates a pointer to the actual list,
+///	       initially pointing to last
+///
+///Parameters: const CLinkedList<eltType> &l - list to 
+///	      be refered to
+///	      Import
+/// 
+///Member Type: Mutator
+///
+///Return Value: None 
+///
+template <typename eltType>
+CListItr<eltType>::CListItr(const CLinkedList<eltType> &l): itr(l),curr(l.last)
+{}
+
+///
+///Function Name: begin
+///
+///Description: sets the current pointer for the iterator 
+///	       at the start of the circular linked list 
+///
+///Parameters: None
+/// 
+///Member Type: Mutator
+///
+///Return Value: void 
+///
+template <typename eltType> void CListItr<eltType>::begin(void)
+{curr = itr.last->next;}
+
+///
+///Function Name: isEmpty
+///
+///Description: Checks to see if the iterator has no
+///	       values/nodes
+///
+///Parameters: None
+/// 
+///Member Type: Inspector
+///
+///Return Value: bool 
+///
+template <typename eltType> bool CListItr<eltType>::isEmpty(void)
+{return curr == NULL;}
+
+///
+///Function Name: isFirstNode
+///
+///Description: returns true if the iterator is pointing
+///             at the first node in the list
+///
+///Parameters: None
+/// 
+///Member Type: Inspector
+///
+///Return Value: bool 
+///
+template <typename eltType> bool CListItr<eltType>::isFirstNode(void)
+{return curr == itr.last->next;}
+
+///
+///Function Name: isLastNode
+///
+///Description: returns true if the iterator is pointing
+///             at the last node in the list
+///
+///Parameters: None
+/// 
+///Member Type: Inspector
+///
+///Return Value: bool 
+///
+template <typename eltType> bool CListItr<eltType>::isLastNode(void)
+{return curr == itr.last;}
+
+///
+///Function Name: operator*
+///
+///Description: returns the eltType/data of the current Node in 
+///	       a manipulatable form
+///
+///Parameters: None
+/// 
+///Member Type: Inspector
+///
+///Return Value: eltType 
+///
+template <typename eltType> eltType CListItr<eltType>::operator*(void)
+{return curr->data;}
+
+///
+///Function Name: operator*
+///
+///Description: returns the eltType/data of the current Node in 
+///	       a constant form
+///
+///Parameters: None
+/// 
+///Member Type: Inspector
+///
+///Return Value: eltType 
+///
+template <typename eltType> const eltType CListItr<eltType>::operator*(void) const
+{return curr->data;}
+
+///
+///Function Name: operator++
+///
+///Description: Pre increments the iterator to the next node in 
+///	       the list, if one 
+///
+///Parameters: None
+/// 
+///Member Type: Mutator
+///
+///Return Value: CListItr<eltType>& - A reference to the iterator 
+///
+template <typename eltType> CListItr<eltType>& CListItr<eltType>::operator++(void)
+{curr = curr->next;
+return *this;
+}
+
+
+
+///
+///Function Name: operator++
+///
+///Description: Post increments the iterator to the next node in 
+///	       the list, if one 
+///
+///Parameters: int - The value to be incremented by
+///	      Import
+/// 
+///Member Type: Mutator
+///
+///Return Value: CListItr<eltType>& - A reference to the iterator 
+///
+template <typename eltType> CListItr<eltType>& CListItr<eltType>::operator++(int)
+{curr = curr->next;
+return *this;
+}
+
+#endif

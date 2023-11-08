@@ -1,0 +1,7 @@
+/**
+\mainpage WordData Object Array, WordData CLinkedList, WordData Vector Object
+\n
+The following documentation is an example that uses three data structures to house WordData objects. Each WordData object is a unique word within the file that is to be read, it also holds the number of occurences of this word. There is an object array WordDataList that prints Iterativly, Recursivly, and through the use of a Pointer. There is also a Circular List WordCList that prints through the use of an Iterator, and through the use of an Iterator Recursivly. Finally, there is the STL Vector WordSTLSeq that prints Iterativly and Recursivly. The test driver for this is app.cpp
+\n
+---
+*/

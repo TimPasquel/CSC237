@@ -1,0 +1,285 @@
+/****************************************************************/
+/*   Author:         Dr. Spiegel & Tim Pasquel                  */
+/*   Course:         CSC237                                     */
+/*   Filename:       app.cpp                                    */
+/*   Purpose:        This Example inputs a string and demon-    */
+/*                   strates how to store it using a subclass   */
+/*                   of an abstract base class that incorporates*/
+/*                   virtual functions to enable polymorphism   */
+/*                   If a file name is                          */
+/*                   input through the command line all of the  */
+/*                   options will be done automatically for the */
+/*                   first line of the file                     */
+/****************************************************************/
+
+#include <iostream>
+#include <sstream>
+#include <vector>
+#include <fstream>
+#include "WordList.h"
+#include "WordDataList.h"
+#include "WordCList.h"
+#include "WordSTLSeq.h"
+
+// #include "WordData.h"        app only knows about the lists!
+
+using namespace std;
+
+///
+///Function Name: displayMenu                                    
+///                                                                   
+///Description: Displays the menu on the screen.                   
+///
+///Parameters: None
+///
+void displayMenu();
+
+///                                                                  
+///Function Name: printEverything                                  
+///                                                                  
+///Description: Takes in a sentence and sends it through every     
+///             parsing and printing function                      
+///                                                                   
+///Parameters:  ifstream &inf - file to be read
+///           
+///             WordList *TheList - WordList pointer that 
+///             points to the current data structure
+///
+void printEverything(ifstream &inf,WordList *TheList);
+
+///                                                                  
+///Function Name: printObjArrayIterative                                  
+///                                                                  
+///Description: Takes in a file, parses into an Obj. Array
+///             and then prints iteratively                      
+///                                                                   
+///Parameters:  ifstream &inf - file to be read           
+///             WordList *TheList - WordList pointer that
+///             will point to an Obj Array data structure         
+///
+void printObjArrayIterative(ifstream &inf, WordList *TheList);
+
+///                                                                  
+///Function Name: printObjArrayRecursive                                  
+///                                                                  
+///Description: Takes in a file, parses into an Obj. Array
+///             and then prints recursively                      
+///                                                                   
+///Parameters:  ifstream &inf - file to be read           
+///             WordList *TheList - WordList pointer that
+///             will point to an Obj Array data structure         
+///
+void printObjArrayRecursive(ifstream &inf, WordList *TheList);
+
+///                                                                  
+///Function Name: printObjArrayPointerRecursive                                 
+///                                                                  
+///Description: Takes in a file, parses into an Obj. Array
+///             and then prints recursively using a pointer                      
+///                                                                   
+///Parameters:  ifstream &inf - file to be read           
+///             WordList *TheList - WordList pointer that
+///             will point to an Obj Array data structure         
+///
+void printObjArrayPointerRecursive(ifstream &inf, WordList *TheList);
+
+///                                                                  
+///Function Name: printCListIterator                                  
+///                                                                  
+///Description: Takes in a file, parses into a CList object
+///             and then prints iteratively                      
+///                                                                   
+///Parameters:  ifstream &inf - file to be read           
+///             WordList *TheList - WordList pointer that
+///             will point to a CList data structure         
+///
+void printCListIterator(ifstream &inf, WordList *TheList);
+
+///                                                                  
+///Function Name: printCListIteratorRecursive                                  
+///                                                                  
+///Description: Takes in a file, parses into a CList object
+///             and then prints recursively using an 
+///             iterator                      
+///                                                                   
+///Parameters:  ifstream &inf - file to be read           
+///             WordList *TheList - WordList pointer that
+///             will point to a CList data structure         
+///
+void printCListIteratorRecursive(ifstream &inf, WordList *TheList);
+
+///                                                                  
+///Function Name: printSTLSeqIterator                                  
+///                                                                  
+///Description: Takes in a file, parses into a vector object
+///             and then prints iteratively                      
+///                                                                   
+///Parameters:  ifstream &inf - file to be read           
+///             WordList *TheList - WordList pointer that
+///             will point to a vector data structure         
+///
+void printSTLSeqIterator(ifstream &inf, WordList *TheList);
+
+///                                                                  
+///Function Name: printSTLSeqRecursive                                  
+///                                                                  
+///Description: Takes in a file, parses into a vector object
+///             and then prints recursively                      
+///                                                                   
+///Parameters:  ifstream &inf - file to be read           
+///             WordList *TheList - WordList pointer that
+///             will point to a vector data structure         
+///
+void printSTLSeqRecursive(ifstream &inf, WordList *TheList);
+
+int main(int argc,char *argv[])
+{ ifstream inf;
+  WordList *TheList;
+  if(argc>1) //if there was an input on the command line
+    {
+      inf.open(argv[1]); //try and open the file
+      if (inf.fail())       //if the file does not open
+        {                    //terminate
+          cout<<"Sorry, the file failed to open."<<endl;
+          return 0;
+        }
+      printEverything(inf,TheList);
+      return 0;
+    }
+
+  char selection;
+  string fileName;
+  cout<<"Please enter a file name:"<<endl;
+  getline(cin,fileName);
+  inf.open(fileName.c_str());
+  
+  // TheList is a pointer to a WordList that is pointed at a WordList subclass
+  //TheList=new WordDataList;
+  //TheList = new WordCList;
+  //TheList=new WordSTLSeq;
+  //TheList->parseIntoList(inf);  // Apply polymorphism
+  while (true)
+    {
+      displayMenu();
+      cin>>selection;
+      switch(selection)
+        { case '1':
+            printObjArrayIterative(inf, TheList);
+            break;
+          case '2':
+            printObjArrayRecursive(inf, TheList);
+            break;
+          case '3':
+            printObjArrayPointerRecursive(inf, TheList);
+            break;
+	  case '4':
+	    printCListIterator(inf, TheList);
+	    break;
+          case '5':
+	    printCListIteratorRecursive(inf, TheList);
+            break;
+          case '6':
+            printSTLSeqIterator(inf, TheList);
+            break;
+          case '7':
+            printSTLSeqRecursive(inf, TheList);
+            break;
+          case '8':
+            cout<<"Goodbye"<<endl;
+            return 0;
+          default:
+            cout<<"I cannot understand "<<selection<<".  Try again."<<endl;
+             break;
+        }
+    }
+  
+  return 0;
+}
+
+void displayMenu()
+{
+  cout<<endl;
+  cout<<"How do you want to print your sentence elements?"<<endl;
+  cout<<"------------------------------------------------"<<endl;
+  cout<<"1. Object Array Iterative"<<endl;
+  cout<<"2. Object Array Recursive"<<endl;
+  cout<<"3. Object Array Pointer Recursive"<<endl;
+  cout<<"4. Circular List Iterator"<<endl;
+  cout<<"5. Circular List Iterator Recursive"<<endl;
+  cout<<"6. STL Container Iterative"<<endl;
+  cout<<"7. STL Container Recursive"<<endl;
+  cout<<"8. Quit"<<endl;
+}
+
+void printObjArrayIterative(ifstream &inf, WordList *TheList) {
+   TheList = new WordDataList;
+   TheList->parseIntoList(inf);
+   TheList->printIteratively();
+   inf.clear();
+   inf.seekg(0);
+   delete TheList;
+}
+
+void printObjArrayRecursive(ifstream &inf, WordList *TheList) {
+   TheList = new WordDataList;
+   TheList->parseIntoList(inf);
+   TheList->printRecursively();
+   inf.clear();
+   inf.seekg(0);
+   delete TheList;
+}
+
+void printObjArrayPointerRecursive(ifstream &inf, WordList *TheList) {
+   TheList = new WordDataList;
+   TheList->parseIntoList(inf);
+   TheList->printPtr();
+   inf.clear();
+   inf.seekg(0);
+   delete TheList;
+}
+
+void printCListIterator(ifstream &inf, WordList *TheList) {
+   TheList = new WordCList;
+   TheList->parseIntoList(inf);
+   TheList->printIteratively();
+   inf.clear();
+   inf.seekg(0);
+   delete TheList;
+}
+
+void printCListIteratorRecursive(ifstream &inf, WordList *TheList) {
+   TheList = new WordCList;
+   TheList->parseIntoList(inf);
+   TheList->printRecursively();
+   inf.clear();
+   inf.seekg(0);
+   delete TheList;
+}
+
+void printSTLSeqIterator(ifstream &inf, WordList *TheList) {
+   TheList = new WordSTLSeq;
+   TheList->parseIntoList(inf);
+   TheList->printIteratively();
+   inf.clear();
+   inf.seekg(0);
+   delete TheList;
+}
+
+void printSTLSeqRecursive(ifstream &inf, WordList *TheList) {
+   TheList = new WordSTLSeq;
+   TheList->parseIntoList(inf);
+   TheList->printRecursively();
+   inf.clear();
+   inf.seekg(0);
+   delete TheList;
+}
+
+void printEverything(ifstream &inf,WordList *TheList) {
+   printObjArrayIterative(inf, TheList);
+   printObjArrayRecursive(inf, TheList);
+   printObjArrayPointerRecursive(inf, TheList);
+   printCListIterator(inf, TheList);
+   printCListIteratorRecursive(inf, TheList);
+   printSTLSeqIterator(inf, TheList);
+   printSTLSeqRecursive(inf, TheList);
+}
